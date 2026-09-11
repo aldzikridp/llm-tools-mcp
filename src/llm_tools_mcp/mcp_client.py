@@ -10,7 +10,10 @@ from mcp import (
     stdio_client,
 )
 from mcp.client.sse import sse_client
-from mcp.client.streamable_http import streamablehttp_client
+try:  # mcp>=2.0 renamed + dropped session-id from return
+    from mcp.client.streamable_http import streamable_http_client as _streamable_client
+except ImportError:  # mcp 1.x
+    from mcp.client.streamable_http import streamablehttp_client as _streamable_client
 
 
 import datetime
@@ -56,7 +59,8 @@ class McpClient:
                 ) as session:
                     yield session
         elif isinstance(server_config, HttpServerConfig):
-            async with streamablehttp_client(server_config.url) as (read, write, _):
+            async with _streamable_client(server_config.url) as streams:
+                read, write = streams[0], streams[1]
                 async with self._client_session_with_logging(
                     name, read, write
                 ) as session:

@@ -20,7 +20,7 @@ def _create_tool_for_mcp(
     return llm.Tool(
         name=mcp_tool.name,
         description=enriched_description,
-        input_schema=mcp_tool.inputSchema,
+        input_schema=getattr(mcp_tool, "input_schema", None) or getattr(mcp_tool, "inputSchema", None),
         plugin="llm-tools-mcp",
         implementation=impl,
     )
